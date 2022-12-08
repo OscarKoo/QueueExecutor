@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Oscar Koo</Authors>
+    <Company>Oscar Koo</Company>
+    <Description>a high performance in-memory async queue executor</Description>
+    <Copyright>Copyright 2022 Oscar Koo</Copyright>
+    <PackageLicenseUrl>https://github.com/OscarKoo/QueueExecutor/blob/main/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/OscarKoo/QueueExecutor</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/OscarKoo/IndividualLock/master/favicon.ico</PackageIconUrl>
+    <RepositoryUrl>https://github.com/OscarKoo/QueueExecutor</RepositoryUrl>
+    <PackageTags>in-memory queue executor</PackageTags>
+    <PackageReleaseNotes>Visit the project's url to see the Release Notes</PackageReleaseNotes>
+  </PropertyGroup>
+
+</Project>
