@@ -29,7 +29,6 @@ namespace Dao.QueueExecutor
         public void Throw()
         {
             this.incoming = true;
-
             if (this.locker.CurrentCount < 1)
                 return;
 
@@ -50,19 +49,23 @@ namespace Dao.QueueExecutor
 
         async Task Handle()
         {
+            Func<Task> @catch = null;
+            Action<Exception> onException = null;
+
             do
             {
                 this.incoming = false;
-
                 await this.locker.WaitAsync().ConfigureAwait(false);
                 try
                 {
-                    var @catch = await GetHandler();
+                    if (@catch == null)
+                        @catch = await GetHandler();
                     await @catch();
                 }
                 catch (Exception ex)
                 {
-                    var onException = OnException;
+                    if (onException == null)
+                        onException = OnException;
                     if (onException != null)
                     {
                         try

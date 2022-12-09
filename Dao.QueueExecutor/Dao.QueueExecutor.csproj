@@ -13,6 +13,7 @@
     <RepositoryUrl>https://github.com/OscarKoo/QueueExecutor</RepositoryUrl>
     <PackageTags>in-memory queue executor</PackageTags>
     <PackageReleaseNotes>Visit the project's url to see the Release Notes</PackageReleaseNotes>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
 </Project>

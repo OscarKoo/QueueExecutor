@@ -59,6 +59,10 @@ namespace Dao.QueueExecutor
 
         async Task Dequeue()
         {
+            Func<TQueue, Task<TResponse>> execute = null;
+            Func<TQueue, TResponse, Task> executed = null;
+            Action<Exception> onException = null;
+
             do
             {
                 this.incoming = false;
@@ -69,15 +73,19 @@ namespace Dao.QueueExecutor
                     {
                         try
                         {
-                            var execute = await GetHandler();
+                            if (execute == null)
+                                execute = await GetHandler();
                             var response = await execute(data);
-                            var executed = Executed;
+
+                            if (executed == null)
+                                executed = Executed;
                             if (executed != null)
                                 await executed(data, response);
                         }
                         catch (Exception ex)
                         {
-                            var onException = OnException;
+                            if (onException == null)
+                                onException = OnException;
                             if (onException != null)
                             {
                                 try
