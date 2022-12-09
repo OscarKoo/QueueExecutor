@@ -52,8 +52,8 @@ You can make a notification many times in the previous step, and the catcher wil
 **Notice:** If you set more than one catcher, the rest of them will only get to work when the fisrt one get busy.
 
 ```C#
-// declare the notifier, and set 4 concurrent catcher to handle the notification.
-public static readonly Catcher notifier = new Catcher(4);
+// declare the notifier, and set 1 concurrent catcher to handle the notification.
+public static readonly Catcher notifier = new Catcher(1);
 
 public CatcherTest()
 {
@@ -64,6 +64,7 @@ public CatcherTest()
 async Task Husband_Says_OK()
 {
     // do what ever you want to do while receiving the notification.
+    Thread.Sleep(TimeSpan.FromMinutes(10));
 }
 
 public void Wife_Is_Yelling()
