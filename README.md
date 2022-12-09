@@ -47,7 +47,7 @@ public void CreateRequest(string content)
 
 ***Catcher*** is a high performance non-blocking in-memory async notification
 
-You can make a notification many times in the previous step, and the catcher will receive the notification only once in the following step, and decide what to do.
+You can make a notification many times in the previous step, and the catcher will receive the notification at least once in the following step, and decide what to do.
 
 **Notice:** If you set more than one catcher, the rest of them will only get to work when the fisrt one get busy.
 
@@ -79,11 +79,11 @@ public void Wife_Is_Yelling()
 
 ## Matrix
 
-|                                    | QueueExecutor | Catcher |
-|------------------------------------|:-------------:|:-------:|
-| Queue based                        | √             | X       |
-| One request to one handle          | √             | X       |
-| Multiple requests only handle once | X             | √       |
-| Handle request                     | √             | √       |
-| Handle response                    | √             | X       |
-| Handle Exception                   | √             | √       |
+|                                                 | QueueExecutor | Catcher |
+|-------------------------------------------------|:-------------:|:-------:|
+| Queue based                                     | √             | X       |
+| One request triggers handler once               | √             | X       |
+| Multiple requests trigger handler at least once | X             | √       |
+| Handle request (Execute / Catch)                | √             | √       |
+| Handle response (Executed)                      | √             | X       |
+| Handle exception (OnException)                  | √             | √       |

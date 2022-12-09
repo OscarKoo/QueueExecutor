@@ -32,7 +32,17 @@ namespace Dao.QueueExecutor
             if (this.locker.CurrentCount < 1)
                 return;
 
-            Task.Run(Handle);
+            Entry(false);
+        }
+
+        void Entry(bool wait)
+        {
+            if (wait)
+                this.locker.Wait();
+            else if (!this.locker.Wait(0))
+                return;
+
+            Handle();
         }
 
         async Task<Func<Task>> GetHandler()
@@ -49,37 +59,32 @@ namespace Dao.QueueExecutor
 
         async Task Handle()
         {
-            Func<Task> @catch = null;
-            Action<Exception> onException = null;
+            this.incoming = false;
 
-            do
+            try
             {
-                this.incoming = false;
-                await this.locker.WaitAsync().ConfigureAwait(false);
-                try
+                var @catch = await GetHandler();
+                await @catch();
+            }
+            catch (Exception ex)
+            {
+                var onException = OnException;
+                if (onException != null)
                 {
-                    if (@catch == null)
-                        @catch = await GetHandler();
-                    await @catch();
-                }
-                catch (Exception ex)
-                {
-                    if (onException == null)
-                        onException = OnException;
-                    if (onException != null)
+                    try
                     {
-                        try
-                        {
-                            onException(ex);
-                        }
-                        catch (Exception e) { }
+                        onException(ex);
                     }
+                    catch (Exception e) { }
                 }
-                finally
-                {
-                    this.locker.Release();
-                }
-            } while (this.incoming);
+            }
+            finally
+            {
+                this.locker.Release();
+            }
+
+            if (this.incoming)
+                Entry(true);
         }
     }
 }

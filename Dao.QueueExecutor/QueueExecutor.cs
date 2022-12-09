@@ -42,7 +42,17 @@ namespace Dao.QueueExecutor
             if (this.locker.CurrentCount < 1)
                 return;
 
-            Task.Run(Dequeue);
+            Entry(false);
+        }
+
+        void Entry(bool wait)
+        {
+            if (wait)
+                this.locker.Wait();
+            else if (!this.locker.Wait(0))
+                return;
+
+            Dequeue();
         }
 
         async Task<Func<TQueue, Task<TResponse>>> GetHandler()
@@ -59,49 +69,49 @@ namespace Dao.QueueExecutor
 
         async Task Dequeue()
         {
+            this.incoming = false;
+
             Func<TQueue, Task<TResponse>> execute = null;
             Func<TQueue, TResponse, Task> executed = null;
             Action<Exception> onException = null;
 
-            do
+            try
             {
-                this.incoming = false;
-                await this.locker.WaitAsync().ConfigureAwait(false);
-                try
+                while (this.queue.TryDequeue(out var data))
                 {
-                    while (this.queue.TryDequeue(out var data))
+                    try
                     {
-                        try
-                        {
-                            if (execute == null)
-                                execute = await GetHandler();
-                            var response = await execute(data);
+                        if (execute == null)
+                            execute = await GetHandler();
+                        var response = await execute(data);
 
-                            if (executed == null)
-                                executed = Executed;
-                            if (executed != null)
-                                await executed(data, response);
-                        }
-                        catch (Exception ex)
+                        if (executed == null)
+                            executed = Executed;
+                        if (executed != null)
+                            await executed(data, response);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (onException == null)
+                            onException = OnException;
+                        if (onException != null)
                         {
-                            if (onException == null)
-                                onException = OnException;
-                            if (onException != null)
+                            try
                             {
-                                try
-                                {
-                                    onException(ex);
-                                }
-                                catch (Exception e) { }
+                                onException(ex);
                             }
+                            catch (Exception e) { }
                         }
                     }
                 }
-                finally
-                {
-                    this.locker.Release();
-                }
-            } while (this.incoming);
+            }
+            finally
+            {
+                this.locker.Release();
+            }
+
+            if (this.incoming)
+                Entry(true);
         }
     }
 }
