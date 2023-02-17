@@ -82,13 +82,13 @@ namespace Dao.QueueExecutor
                     try
                     {
                         if (execute == null)
-                            execute = await GetHandler();
-                        var response = await execute(data);
+                            execute = await GetHandler().ConfigureAwait(false);
+                        var response = await execute(data).ConfigureAwait(false);
 
                         if (executed == null)
                             executed = Executed;
                         if (executed != null)
-                            await executed(data, response);
+                            await executed(data, response).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {

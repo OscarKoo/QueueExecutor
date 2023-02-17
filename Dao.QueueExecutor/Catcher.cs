@@ -63,8 +63,8 @@ namespace Dao.QueueExecutor
 
             try
             {
-                var @catch = await GetHandler();
-                await @catch();
+                var @catch = await GetHandler().ConfigureAwait(false);
+                await @catch().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
