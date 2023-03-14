@@ -37,25 +37,23 @@ namespace Dao.QueueExecutor
         {
             this.queue.Enqueue(data);
 
+            var enter = this.locker.TestWait();
             this.incoming = true;
-
-            if (this.locker.CurrentCount < 1)
+            if (!enter)
                 return;
 
-            Entry(false);
+            Task.Run(() => Entry(false));
         }
 
         void Entry(bool wait)
         {
             if (wait)
                 this.locker.Wait();
-            else if (!this.locker.Wait(0))
-                return;
 
             Dequeue();
         }
 
-        async Task<Func<TQueue, Task<TResponse>>> GetHandler()
+        Func<TQueue, Task<TResponse>> GetHandler()
         {
             while (true)
             {
@@ -63,11 +61,11 @@ namespace Dao.QueueExecutor
                 if (result != null)
                     return result;
 
-                await Task.Delay(15).ConfigureAwait(false);
+                Thread.Sleep(15);
             }
         }
 
-        async Task Dequeue()
+        void Dequeue()
         {
             this.incoming = false;
 
@@ -82,13 +80,13 @@ namespace Dao.QueueExecutor
                     try
                     {
                         if (execute == null)
-                            execute = await GetHandler().ConfigureAwait(false);
-                        var response = await execute(data).ConfigureAwait(false);
+                            execute = GetHandler();
+                        var response = execute(data).GetAwaiter().GetResult();
 
                         if (executed == null)
                             executed = Executed;
                         if (executed != null)
-                            await executed(data, response).ConfigureAwait(false);
+                            executed(data, response).GetAwaiter().GetResult();
                     }
                     catch (Exception ex)
                     {

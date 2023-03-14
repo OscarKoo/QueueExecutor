@@ -28,24 +28,23 @@ namespace Dao.QueueExecutor
         /// </summary>
         public void Throw()
         {
+            var enter = this.locker.TestWait();
             this.incoming = true;
-            if (this.locker.CurrentCount < 1)
+            if (!enter)
                 return;
 
-            Entry(false);
+            Task.Run(() => Entry(false));
         }
 
         void Entry(bool wait)
         {
             if (wait)
                 this.locker.Wait();
-            else if (!this.locker.Wait(0))
-                return;
 
             Handle();
         }
 
-        async Task<Func<Task>> GetHandler()
+        Func<Task> GetHandler()
         {
             while (true)
             {
@@ -53,18 +52,18 @@ namespace Dao.QueueExecutor
                 if (result != null)
                     return result;
 
-                await Task.Delay(15).ConfigureAwait(false);
+                Thread.Sleep(15);
             }
         }
 
-        async Task Handle()
+        void Handle()
         {
             this.incoming = false;
 
             try
             {
-                var @catch = await GetHandler().ConfigureAwait(false);
-                await @catch().ConfigureAwait(false);
+                var @catch = GetHandler();
+                @catch().GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
