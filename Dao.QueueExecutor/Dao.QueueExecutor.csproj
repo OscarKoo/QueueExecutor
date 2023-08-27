@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>NETSTANDARD2.0;NET45;NETCOREAPP2.0;</TargetFrameworks>
+    <TargetFrameworks>NETSTANDARD2.0;NET45;NETCOREAPP2.0;net7.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Oscar Koo</Authors>
     <Company>Oscar Koo</Company>
@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/OscarKoo/QueueExecutor</RepositoryUrl>
     <PackageTags>in-memory queue executor</PackageTags>
     <PackageReleaseNotes>Visit the project's url to see the Release Notes</PackageReleaseNotes>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
   </PropertyGroup>
 
 </Project>
