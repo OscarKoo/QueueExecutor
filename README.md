@@ -82,10 +82,10 @@ public void Wife_Is_Yelling()
 |                                                 | QueueExecutor | Catcher |
 |-------------------------------------------------|:-------------:|:-------:|
 | Queue based                                     | √             | X       |
-| One request triggers handler once               | √             | X       |
-| Multiple requests trigger handler at least once | X             | √       |
+| One request fires handler once                  | √             | X       |
+| Multiple requests fire handler at least once    | X             | √       |
 | Handle request (Execute / Catch)                | √             | √       |
-| Handle response (Executed)                      | √             | X       |
+| ~~Handle response (Executed)~~                  | √             | X       |
 | Handle exception (OnException)                  | √             | √       |
 
 
