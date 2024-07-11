@@ -87,3 +87,16 @@ public void Wife_Is_Yelling()
 | Handle request (Execute / Catch)                | √             | √       |
 | Handle response (Executed)                      | √             | X       |
 | Handle exception (OnException)                  | √             | √       |
+
+
+## Benchmark
+Running 10000000 times System.Threading.Channels.Channel's TryWrite & QueueExecutor's Push
+
+BenchmarkDotNet v0.13.12, Windows 10 (10.0.19045.4046/22H2/2022Update)
+Intel Xeon E-2246G CPU 3.60GHz, 1 CPU, 12 logical and 6 physical cores
+.NET SDK 7.0.307
+
+| Method             | Mean     | Error     | StdDev    | Median   | Allocated |
+|------------------- |---------:|----------:|----------:|---------:|----------:|
+| Channel_Write      | 502.7 ms | 102.70 ms | 302.80 ms | 289.6 ms |     76 MB |
+| QueueExecutor_Push | 113.0 ms |   2.26 ms |   2.51 ms | 112.2 ms |   76.8 MB |
