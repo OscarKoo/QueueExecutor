@@ -1,89 +1,56 @@
 ﻿using System;
-using System.Threading;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Dao.QueueExecutor
 {
     public class Catcher
     {
-        readonly SemaphoreSlim locker;
-        volatile bool incoming;
+        readonly QueueBatchExecutor<byte> executor;
+
+        int bindCount;
+        Func<Task> onCatch;
 
         public Catcher(int concurrentCount = 1)
         {
             if (concurrentCount < 1)
                 concurrentCount = 1;
 
-            this.locker = new SemaphoreSlim(concurrentCount, concurrentCount);
+            this.executor = new QueueBatchExecutor<byte>(concurrentCount, QueueMode.None);
         }
 
         /// <summary>
-        /// Set the catcher to catch the ball.
+        ///     Set the catcher to catch the ball.
         /// </summary>
-        public event Func<Task> Catch;
-        public event Action<Exception> OnException;
+        public event Func<Task> Catch
+        {
+            add
+            {
+                this.onCatch += value;
+                this.executor.Bind(OnExecute, ref this.bindCount);
+            }
+            remove
+            {
+                this.executor.Unbind(OnExecute, ref this.bindCount);
+                this.onCatch -= value;
+            }
+        }
+
+        public event Action<Exception> OnException
+        {
+            add => this.executor.OnException += value;
+            remove => this.executor.OnException -= value;
+        }
+
+        async Task OnExecute(IList<byte> data)
+        {
+            var exec = this.onCatch.MustGet();
+            await exec.InvokeAllEventsAsync().ConfigureAwait(false);
+        }
 
         /// <summary>
-        /// Throw a ball in any time, and there would be at least one catcher to catch the ball.
+        ///     Throw a ball in any time, and there would be at least one catcher to catch the ball.
         /// </summary>
-        public void Throw()
-        {
-            var enter = this.locker.TestWait();
-            this.incoming = true;
-            if (!enter)
-                return;
-
-            Task.Run(() => Entry(false));
-        }
-
-        void Entry(bool wait)
-        {
-            if (wait)
-                this.locker.Wait();
-
-            Handle();
-        }
-
-        Func<Task> GetHandler()
-        {
-            while (true)
-            {
-                var result = Catch;
-                if (result != null)
-                    return result;
-
-                Thread.Sleep(15);
-            }
-        }
-
-        void Handle()
-        {
-            this.incoming = false;
-
-            try
-            {
-                var @catch = GetHandler();
-                @catch().GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                var onException = OnException;
-                if (onException != null)
-                {
-                    try
-                    {
-                        onException(ex);
-                    }
-                    catch (Exception e) { }
-                }
-            }
-            finally
-            {
-                this.locker.Release();
-            }
-
-            if (this.incoming)
-                Entry(true);
-        }
+        public void Throw() => this.executor.Push(0);
     }
 }
