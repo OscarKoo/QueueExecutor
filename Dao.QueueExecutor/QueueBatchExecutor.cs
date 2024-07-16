@@ -13,7 +13,11 @@ namespace Dao.QueueExecutor
         readonly ConcurrentQueue<T> queue;
         volatile bool incoming;
 
-        public QueueBatchExecutor(int concurrentCount = 1, QueueMode mode = QueueMode.Batch)
+        public QueueBatchExecutor(int concurrentCount = 1) : this(concurrentCount, QueueMode.Batch)
+        {
+        }
+
+        internal QueueBatchExecutor(int concurrentCount, QueueMode mode)
         {
             if (concurrentCount < 1)
                 concurrentCount = 1;
